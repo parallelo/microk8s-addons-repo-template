@@ -37,6 +37,7 @@ def log(msg):
 @click.option("--toolkit-version", default=None)
 @click.option("--set-as-default-runtime/--no-set-as-default-runtime", is_flag=True, default=True)
 @click.option("--set", "helm_set", multiple=True)
+@click.option("--set-string", "helm_set_string", multiple=True)
 @click.option("-f", "--values", "helm_values", multiple=True, type=click.Path(exists=True))
 def main(
     requires: list,
@@ -46,6 +47,7 @@ def main(
     toolkit_version: str,
     set_as_default_runtime: bool,
     helm_set: list,
+    helm_set_string: list,
     helm_values: list,
 ):
     click.echo("Enabling NVIDIA GPU")
@@ -104,10 +106,12 @@ def main(
 
     for arg in helm_set:
         helm_args.extend(["--set", arg])
+    for arg in helm_set_string:
+        helm_args.extend(["--set-string", arg])
     for arg in helm_values:
         helm_args.extend(["--values", arg])
 
-    subprocess.run([HELM, "repo", "add", "nvidia-compute", "https://github.com/parallelo/gpu-operator"])
+    subprocess.run([HELM, "repo", "add", "nvidia-compute", "https://nvidia.github.io/gpu-operator"])
     subprocess.run([HELM, "repo", "update", "nvidia-compute"])
     subprocess.run([HELM, *helm_args], input=json.dumps(helm_config).encode())
 
